@@ -75,6 +75,9 @@ class MainActivity : AppCompatActivity() {
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
+            id?.let {
+                Timber.d("Download $it completed")
+            }
         }
     }
 
