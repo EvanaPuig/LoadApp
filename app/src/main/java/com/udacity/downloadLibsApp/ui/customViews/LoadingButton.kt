@@ -3,9 +3,11 @@ package com.udacity.downloadLibsApp.ui.customViews
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.*
+import android.os.SystemClock.sleep
 import android.util.AttributeSet
 import android.view.View
 import com.udacity.downloadLibsApp.R
+import timber.log.Timber
 import kotlin.properties.Delegates
 
 class LoadingButton @JvmOverloads constructor(
@@ -19,7 +21,11 @@ class LoadingButton @JvmOverloads constructor(
     private val valueAnimator = ValueAnimator()
 
     private var buttonState: ButtonState by Delegates.observable<ButtonState>(ButtonState.Completed) { p, old, new ->
-        ButtonState.Completed
+        Timber.d("Button State changed: ${resources.getString(buttonState.labelResource)}")
+    }
+
+    init {
+        isClickable = true
     }
 
     private val paintRect = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -61,4 +67,23 @@ class LoadingButton @JvmOverloads constructor(
         rect.bottom = measuredHeight - paddingBottom - offset
     }
 
+    override fun performClick(): Boolean {
+        super.performClick()
+
+        Timber.d("Button was clicked")
+
+        buttonState = ButtonState.Clicked
+
+        invalidate()
+
+        sleep(4000)
+
+        buttonState = ButtonState.Loading
+
+        sleep(4000)
+
+        buttonState = ButtonState.Completed
+
+        return true
+    }
 }

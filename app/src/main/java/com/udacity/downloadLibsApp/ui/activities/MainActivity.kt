@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
 import android.os.Bundle
+import android.view.MotionEvent
 import android.view.View
 import android.widget.RadioButton
 import android.widget.Toast
@@ -20,7 +21,7 @@ import kotlinx.android.synthetic.main.content_main.*
 import timber.log.Timber
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), View.OnTouchListener {
 
     private var downloadID: Long = 0
 
@@ -37,16 +38,28 @@ class MainActivity : AppCompatActivity() {
 
         registerReceiver(receiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
 
-        custom_button.setOnClickListener {
-            Timber.d("Downloading file $downloadUrl")
-            download(downloadUrl)
-        }
+        custom_button.setOnTouchListener(this)
     }
 
     override fun onDestroy() {
         super.onDestroy()
 
         unregisterReceiver(receiver)
+    }
+
+    override fun onTouch(v: View?, event: MotionEvent?): Boolean {
+        return if (event?.action == MotionEvent.ACTION_UP) {
+            v?.performClick()
+            onDownloadButtonClicked()
+            true
+        } else {
+            false
+        }
+    }
+
+    private fun onDownloadButtonClicked() {
+        Timber.d("Downloading file $downloadUrl")
+        download(downloadUrl)
     }
 
     fun onRadioButtonClicked(view: View) {
@@ -104,5 +117,7 @@ class MainActivity : AppCompatActivity() {
         private const val LOAD_APP_URL = "https://github.com/udacity/nd940-c3-advanced-android-programming-project-starter"
         private const val RETROFIT_URL = "https://github.com/square/retrofit"
     }
+
+
 
 }
