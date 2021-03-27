@@ -20,8 +20,13 @@ class LoadingButton @JvmOverloads constructor(
 
     private val valueAnimator = ValueAnimator()
 
-    private var buttonState: ButtonState by Delegates.observable<ButtonState>(ButtonState.Completed) { p, old, new ->
-        Timber.d("Button State changed: ${resources.getString(buttonState.labelResource)}")
+    private var buttonState: ButtonState by Delegates.observable<ButtonState>(ButtonState.Completed) { _, _, newState ->
+        Timber.d("Button state changed to $newState")
+        when(newState) {
+            ButtonState.Clicked -> Timber.d("Button is in clicked state")
+            ButtonState.Completed -> Timber.d("Button is in completed state") //valueAnimator.cancel()
+            ButtonState.Loading -> Timber.d("Button is in loading state") //valueAnimator.start()
+        }
     }
 
     init {
@@ -72,18 +77,13 @@ class LoadingButton @JvmOverloads constructor(
 
         Timber.d("Button was clicked")
 
-        buttonState = ButtonState.Clicked
-
-        invalidate()
-
-        sleep(4000)
-
-        buttonState = ButtonState.Loading
-
-        sleep(4000)
-
-        buttonState = ButtonState.Completed
-
         return true
+    }
+
+    fun changeButtonState(state: ButtonState) {
+        if (state != buttonState) {
+            buttonState = state
+            invalidate()
+        }
     }
 }

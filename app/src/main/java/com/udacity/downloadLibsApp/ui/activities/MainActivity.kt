@@ -16,6 +16,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import com.udacity.downloadLibsApp.R
+import com.udacity.downloadLibsApp.ui.customViews.ButtonState
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import timber.log.Timber
@@ -89,6 +90,7 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener {
         override fun onReceive(context: Context?, intent: Intent?) {
             val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
             id?.let {
+                custom_button.changeButtonState(ButtonState.Completed)
                 Timber.d("Download $it completed")
             }
         }
@@ -98,6 +100,7 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener {
         if (url.isNullOrEmpty())
             Toast.makeText(this, "Error", Toast.LENGTH_LONG).show()
         else {
+            custom_button.changeButtonState(ButtonState.Clicked)
             val request =
                 DownloadManager.Request(Uri.parse(url))
                     .setTitle(getString(R.string.app_name))
@@ -106,6 +109,7 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener {
                     .setAllowedOverMetered(true)
                     .setAllowedOverRoaming(true)
 
+            custom_button.changeButtonState(ButtonState.Loading)
             val downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
             downloadID =
                 downloadManager.enqueue(request)// enqueue puts the download request in the queue.
