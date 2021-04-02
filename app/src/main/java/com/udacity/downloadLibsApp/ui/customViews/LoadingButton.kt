@@ -30,7 +30,7 @@ class LoadingButton @JvmOverloads constructor(
     // Button rectangle paint
     private val paintRect = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
-        strokeWidth = 2f
+        strokeWidth = STROKE_SIZE
         color = resources.getColor(R.color.colorPrimary, context.theme)
     }
 
@@ -38,13 +38,12 @@ class LoadingButton @JvmOverloads constructor(
     private val paintText = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         typeface = Typeface.create("", Typeface.BOLD)
         textAlign = Paint.Align.CENTER
-        textSize = 55.0f
+        textSize = TEXT_SIZE
         color = Color.WHITE
     }
 
     // Button State
-    private var buttonState: ButtonState by Delegates.observable<ButtonState>(ButtonState.Completed) { _, _, newState ->
-        Timber.d("Button state changed to $newState")
+    private var buttonState: ButtonState by Delegates.observable(ButtonState.Completed) { _, _, newState ->
         currentButtonText = resources.getString(newState.labelResource)
         when(newState) {
             ButtonState.Clicked -> {
@@ -80,7 +79,7 @@ class LoadingButton @JvmOverloads constructor(
     }
 
     // Background Animator
-    private val buttonBackgroundAnimator = ValueAnimator.ofFloat(0f, widthSize.toFloat()).apply {
+    private val buttonBackgroundAnimator = ValueAnimator.ofFloat(START_BUTTON_BACKGROUND_POSITION, widthSize.toFloat()).apply {
             repeatMode = ValueAnimator.RESTART
             repeatCount = ValueAnimator.INFINITE
             interpolator = LinearInterpolator()
@@ -113,7 +112,7 @@ class LoadingButton @JvmOverloads constructor(
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
-        progressCircleSize = (min(w, h) / 2) * PROGRESS_CIRCLE_SIZE_INCREASE
+        progressCircleSize = (min(w, h) / HALF_DIVIDER) * PROGRESS_CIRCLE_SIZE_INCREASE
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -128,7 +127,7 @@ class LoadingButton @JvmOverloads constructor(
         heightSize = h
         setMeasuredDimension(w, h)
 
-        val offset = paintRect.strokeWidth / 2f // offset used to keep the edges inside the visible rect
+        val offset = paintRect.strokeWidth / HALF_DIVIDER // offset used to keep the edges inside the visible rect
 
         rect.top = paddingTop + offset
         rect.left = paddingStart + offset
@@ -161,7 +160,7 @@ class LoadingButton @JvmOverloads constructor(
         paintText.getTextBounds(currentButtonText, 0, currentButtonText.length, textLimits)
         val horizontalCenter =
             (textLimits.right + textLimits.width() + PROGRESS_CIRCLE_PADDING)
-        val verticalCenter = (heightSize / 2)
+        val verticalCenter = (heightSize / HALF_DIVIDER)
 
         progressCircleRect.set(
             horizontalCenter - progressCircleSize,
@@ -219,5 +218,8 @@ class LoadingButton @JvmOverloads constructor(
         private const val PROGRESS_CIRCLE_SIZE_INCREASE = 0.4f
         private const val TEXT_Y_COORDINATE = 1.6f
         private const val TEXT_X_COORDINATE = 2f
+        private const val TEXT_SIZE = 55.0f
+        private const val STROKE_SIZE = 2f
+        private const val HALF_DIVIDER = 2f
     }
 }

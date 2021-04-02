@@ -1,13 +1,16 @@
-package com.udacity.downloadLibsApp.ui.activities
+package com.udacity.downloadLibsApp.ui.mainActivity
 
 import android.app.DownloadManager
+import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
@@ -15,12 +18,12 @@ import android.widget.RadioButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
+import androidx.lifecycle.ViewModelProvider
 import com.udacity.downloadLibsApp.R
 import com.udacity.downloadLibsApp.ui.customViews.ButtonState
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import timber.log.Timber
-
 
 class MainActivity : AppCompatActivity(), View.OnTouchListener {
 
@@ -32,6 +35,8 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener {
     private lateinit var pendingIntent: PendingIntent
     private lateinit var action: NotificationCompat.Action
 
+    private lateinit var viewModel: MainActivityViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -40,6 +45,13 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener {
         registerReceiver(receiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
 
         custom_button.setOnTouchListener(this)
+
+        createChannel(
+            getString(R.string.notification_channel_id),
+            getString(R.string.notification_channel_name)
+        )
+
+        viewModel = ViewModelProvider(this).get(MainActivityViewModel::class.java)
     }
 
     override fun onDestroy() {
@@ -56,6 +68,30 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener {
         } else {
             false
         }
+    }
+
+    private fun createChannel(channelId: String, channelName: String) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationChannel = NotificationChannel(
+                channelId,
+                channelName,
+                NotificationManager.IMPORTANCE_HIGH
+            )
+                .apply {
+                    setShowBadge(false)
+                }
+
+            notificationChannel.enableLights(true)
+            notificationChannel.lightColor = Color.RED
+            notificationChannel.enableVibration(true)
+            notificationChannel.description = "Time for breakfast"
+
+            val notificationManager = getSystemService(
+                NotificationManager::class.java
+            )
+            notificationManager.createNotificationChannel(notificationChannel)
+        }
+
     }
 
     private fun onDownloadButtonClicked() {
@@ -92,6 +128,7 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener {
             id?.let {
                 custom_button.changeButtonState(ButtonState.Completed)
                 Timber.d("Download $it completed")
+                viewModel.sendDownloadNotification()
             }
         }
     }
@@ -100,6 +137,7 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener {
         if (url.isNullOrEmpty())
             Toast.makeText(this, "Error", Toast.LENGTH_LONG).show()
         else {
+            viewModel.cancelNotifications()
             custom_button.changeButtonState(ButtonState.Clicked)
             val request =
                 DownloadManager.Request(Uri.parse(url))

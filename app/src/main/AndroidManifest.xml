@@ -12,11 +12,11 @@
         android:theme="@style/AppTheme"
         android:name=".DownloadLibsApplication">
         <activity
-            android:name=".ui.activities.DetailActivity"
+            android:name=".ui.detailActivity.DetailActivity"
             android:label="@string/title_activity_detail"
             android:theme="@style/AppTheme.NoActionBar"/>
         <activity
-            android:name=".ui.activities.MainActivity"
+            android:name=".ui.mainActivity.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>

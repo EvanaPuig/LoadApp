@@ -1,4 +1,4 @@
-package com.udacity.downloadLibsApp.ui.activities
+package com.udacity.downloadLibsApp.ui.detailActivity
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
