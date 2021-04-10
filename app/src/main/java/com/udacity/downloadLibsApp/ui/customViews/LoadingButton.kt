@@ -7,13 +7,15 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
 import android.view.animation.LinearInterpolator
+import androidx.core.content.ContextCompat
+import androidx.core.content.withStyledAttributes
 import com.udacity.downloadLibsApp.R
 import timber.log.Timber
 import kotlin.math.min
 import kotlin.properties.Delegates
 
 class LoadingButton @JvmOverloads constructor(
-    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
+    context: Context, private val attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
     private var widthSize = 0
     private var heightSize = 0
@@ -26,6 +28,13 @@ class LoadingButton @JvmOverloads constructor(
 
     private var currentButtonText = ""
     private var currentProgressBackgroundAnimationValue = START_BUTTON_BACKGROUND_POSITION
+
+    private var loadingDefaultBackgroundColor = 0
+    private var loadingBackgroundColor = 0
+    private var loadingDefaultText: CharSequence = ""
+    private var loadingText: CharSequence = ""
+    private var loadingTextColor = 0
+    private var progressCircleBackgroundColor = 0
 
     // Button rectangle paint
     private val paintRect = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -44,24 +53,20 @@ class LoadingButton @JvmOverloads constructor(
 
     // Button State
     private var buttonState: ButtonState by Delegates.observable(ButtonState.Completed) { _, _, newState ->
-        currentButtonText = resources.getString(newState.labelResource)
         when(newState) {
-            ButtonState.Clicked -> {
-                Timber.d("Button is in clicked state")
-                isClickable = false
-                invalidate()
-            }
-            ButtonState.Completed -> {
-                Timber.d("Button is in completed state")
-                animatorSet.cancel()
-                isClickable = true
-                invalidate()
-            }
             ButtonState.Loading -> {
                 Timber.d("Button is in loading state")
+                currentButtonText = loadingText.toString()
                 measureProgressCircle()
                 animatorSet.start()
                 isClickable = false
+                invalidate()
+            }
+            else -> {
+                Timber.d("Button is in $newState state")
+                currentButtonText = loadingDefaultText.toString()
+                animatorSet.cancel()
+                isClickable = true
                 invalidate()
             }
         }
@@ -79,40 +84,45 @@ class LoadingButton @JvmOverloads constructor(
     }
 
     // Background Animator
-    private val buttonBackgroundAnimator = ValueAnimator.ofFloat(START_BUTTON_BACKGROUND_POSITION, widthSize.toFloat()).apply {
-            repeatMode = ValueAnimator.RESTART
-            repeatCount = ValueAnimator.INFINITE
-            interpolator = LinearInterpolator()
-            addUpdateListener {
-                currentProgressBackgroundAnimationValue = it.animatedValue as Float
-                invalidate()
-            }
-        }
+    private lateinit var buttonBackgroundAnimator: ValueAnimator
 
     // Both animations
     private val animatorSet: AnimatorSet = AnimatorSet().apply {
         duration = ANIMATION_TIME
-        playTogether(circleAnimator, buttonBackgroundAnimator)
     }
 
     init {
         isClickable = true
         buttonState = ButtonState.Completed
-        currentButtonText = resources.getString(ButtonState.Completed.labelResource)
+
+        context.withStyledAttributes(attrs, R.styleable.LoadingButton) {
+            loadingDefaultBackgroundColor = getColor(R.styleable.LoadingButton_loadingDefaultBackgroundColor, 0)
+            loadingBackgroundColor = getColor(R.styleable.LoadingButton_loadingBackgroundColor, 0)
+            loadingDefaultText = getText(R.styleable.LoadingButton_loadingDefaultText)
+            loadingTextColor = getColor(R.styleable.LoadingButton_loadingTextColor, 0)
+            loadingText = getText(R.styleable.LoadingButton_loadingText)
+        }.also {
+            currentButtonText = loadingDefaultText.toString()
+            progressCircleBackgroundColor = ContextCompat.getColor(context, R.color.colorAccent)
+        }
+
     }
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
         canvas?.let {
-            it.drawBackgroundColor()
-            it.drawButtonText()
-            it.drawProgressCircle()
+            it.apply {
+                drawBackgroundColor()
+                drawButtonText()
+                drawProgressCircle()
+            }
         }
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
         progressCircleSize = (min(w, h) / HALF_DIVIDER) * PROGRESS_CIRCLE_SIZE_INCREASE
+        setupButtonBackgroundAnimator()
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -155,6 +165,24 @@ class LoadingButton @JvmOverloads constructor(
         )
     }
 
+    private fun AnimatorSet.playProgressCircleAndButtonBackgroundTogether() =
+        apply { playTogether(circleAnimator, buttonBackgroundAnimator) }
+
+    fun setupButtonBackgroundAnimator() {
+        ValueAnimator.ofFloat(START_BUTTON_BACKGROUND_POSITION, widthSize.toFloat()).apply {
+            repeatMode = ValueAnimator.RESTART
+            repeatCount = ValueAnimator.INFINITE
+            interpolator = LinearInterpolator()
+            addUpdateListener {
+                currentProgressBackgroundAnimationValue = it.animatedValue as Float
+                invalidate()
+            }
+        }.also {
+            buttonBackgroundAnimator = it
+            animatorSet.playProgressCircleAndButtonBackgroundTogether()
+        }
+    }
+
     private fun measureProgressCircle() {
         val textLimits = Rect()
         paintText.getTextBounds(currentButtonText, 0, currentButtonText.length, textLimits)
@@ -171,7 +199,7 @@ class LoadingButton @JvmOverloads constructor(
     }
 
     private fun Canvas.drawLoadingBackgroundColor() = paintRect.apply {
-        color = resources.getColor(R.color.colorPrimaryDark, context.theme)
+        color = loadingBackgroundColor
     }.run {
         drawRect(
             0f,
@@ -183,7 +211,7 @@ class LoadingButton @JvmOverloads constructor(
     }
 
     private fun Canvas.drawDefaultBackgroundColor() = paintRect.apply {
-        color = resources.getColor(R.color.colorPrimary, context.theme)
+        color = loadingDefaultBackgroundColor
     }.run {
         drawRect(
             currentProgressBackgroundAnimationValue,

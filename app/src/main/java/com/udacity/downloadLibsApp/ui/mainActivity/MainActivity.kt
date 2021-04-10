@@ -159,7 +159,4 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener {
         private const val LOAD_APP_URL = "https://github.com/udacity/nd940-c3-advanced-android-programming-project-starter"
         private const val RETROFIT_URL = "https://github.com/square/retrofit"
     }
-
-
-
 }

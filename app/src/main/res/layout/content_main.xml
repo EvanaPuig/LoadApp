@@ -60,9 +60,14 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/custom_button_height"
         android:layout_margin="@dimen/custom_button_margin"
-        android:text="@string/button_name"
+        app:loadingDefaultBackgroundColor="?attr/colorPrimary"
+        app:loadingBackgroundColor="?attr/colorPrimaryDark"
+        app:loadingDefaultText="Download"
+        app:loadingText="We are loading"
+        app:loadingTextColor="@color/white"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:text="@string/button_name"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
