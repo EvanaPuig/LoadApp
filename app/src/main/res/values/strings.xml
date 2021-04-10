@@ -19,4 +19,7 @@
     <string name="notification_channel_id" translatable="false">download_channel</string>
     <string name="detail_action">Check the status</string>
     <string name="notification_channel_name">Done!</string>
+    <string name="ok_button_label">OK</string>
+    <string name="file_name_label">File name:</string>
+    <string name="file_status_label">Status:</string>
 </resources>

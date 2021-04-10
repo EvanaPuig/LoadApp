@@ -4,7 +4,6 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.graphics.BitmapFactory
 import androidx.core.app.NotificationCompat
 import com.udacity.downloadLibsApp.R
 import com.udacity.downloadLibsApp.ui.detailActivity.DetailActivity
@@ -28,7 +27,7 @@ fun NotificationManager.sendNotification(messageBody: String, applicationContext
     )
 
     val openDetailIntent = Intent(applicationContext, DetailActivity::class.java)
-    val snoozePendingIntent: PendingIntent = PendingIntent.getActivity(
+    val openDetailPendingIntent: PendingIntent = PendingIntent.getActivity(
         applicationContext,
         REQUEST_CODE,
         openDetailIntent,
@@ -48,7 +47,7 @@ fun NotificationManager.sendNotification(messageBody: String, applicationContext
         .addAction(
             R.drawable.ic_assistant_black_24dp,
             applicationContext.getString(R.string.detail_action),
-            snoozePendingIntent
+            openDetailPendingIntent
         )
         .setPriority(NotificationCompat.PRIORITY_HIGH)
 

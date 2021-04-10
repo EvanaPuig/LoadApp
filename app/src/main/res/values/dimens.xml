@@ -5,4 +5,8 @@
     <dimen name="custom_button_height">60dp</dimen>
     <dimen name="custom_button_margin">20dp</dimen>
     <dimen name="radio_group_margin">20dp</dimen>
+
+    <dimen name="normal_margin_or_padding">16dp</dimen>
+    <dimen name="large_margin_or_padding">24dp</dimen>
+    <dimen name="x_large_margin_or_padding">32dp</dimen>
 </resources>

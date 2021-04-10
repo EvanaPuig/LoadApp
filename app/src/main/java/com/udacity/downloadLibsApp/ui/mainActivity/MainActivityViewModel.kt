@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import com.udacity.downloadLibsApp.R
+import com.udacity.downloadLibsApp.ui.util.cancelNotifications
 import com.udacity.downloadLibsApp.ui.util.sendNotification
 
 class MainActivityViewModel(private val app: Application) : AndroidViewModel(app) {
@@ -18,7 +19,7 @@ class MainActivityViewModel(private val app: Application) : AndroidViewModel(app
     }
 
     fun cancelNotifications() {
-        notificationManager.cancelAll()
+        notificationManager.cancelNotifications()
     }
 
 }
